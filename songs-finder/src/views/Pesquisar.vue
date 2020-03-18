@@ -8,7 +8,7 @@
       <h1>Songs Finder - Pesquisar</h1>
     </div>
 
-    <!-- CONTAINER DO FORM E DA TABLE  -->
+    <!-- CONTAINER DO FORM E DA TABLE DO RESULTADO DA PESQUISA  -->
     <div class="container">
  
       <!-- FORM DA PESQUISA -->
@@ -77,7 +77,7 @@
 import 'moment';
 var moment = require('moment');
 
-// IMPORTAÇÃO DOS MEUS COMPONENTES E VIEWS
+// IMPORTAÇÃO DOS MEUS COMPONENTES E SERVIÇOS
 import Navbar from '@/components/Navbar'
 import Pesquisar from '@/services/pesquisa'
 import Relatorio from '@/services/relatorio'
