@@ -7,6 +7,7 @@
     <div class="text-center pt-5">
       <h1>Songs Finder - Home</h1>
     </div>
+
     <!-- CARD "PESQUISAR" -->
     <div class="pt-6 text-center">
       <v-card
@@ -36,6 +37,7 @@
         </v-card-actions>
       </v-card>
     </div>
+    
     <!-- CARD "RELATÓRIO" -->
     <div class="pt-6 text-center">
       <v-card
