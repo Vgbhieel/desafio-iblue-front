@@ -1,10 +1,13 @@
 <template>  
   <v-app id="home">
+    <!-- NAVBAR -->
     <Navbar />
-    <!-- HOME PAGE -->
+
+    <!-- TÍTULO HOME PAGE -->
     <div class="text-center pt-5">
       <h1>Songs Finder - Home</h1>
     </div>
+    <!-- CARD "PESQUISAR" -->
     <div class="pt-6 text-center">
       <v-card
         dark
@@ -33,7 +36,7 @@
         </v-card-actions>
       </v-card>
     </div>
-    <!--  -->
+    <!-- CARD "RELATÓRIO" -->
     <div class="pt-6 text-center">
       <v-card
         dark
