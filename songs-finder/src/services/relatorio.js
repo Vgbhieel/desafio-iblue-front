@@ -2,7 +2,7 @@ import { http } from './config_api'
 
 export default {
 
-    listar_local:() => {
+    listar:() => {
         return http.get('relatorio')
     },
 

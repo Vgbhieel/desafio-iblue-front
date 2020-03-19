@@ -76,7 +76,7 @@ export default {
     
     // LISTA O RELATÓRIO, ARMAZENANDO AS INFORMAÇÕES NO ARRAY datas
     get_relatorio: function (){
-      get.listar_local().then(resposta => {
+      get.listar().then(resposta => {
       this.datas = resposta.data
       })
     }

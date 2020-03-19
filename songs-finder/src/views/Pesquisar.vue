@@ -29,11 +29,18 @@
       <!-- DATA TABLE DO RESULTADO DA PESQUISA -->
       <v-data-table
           dark
-          hide-default-footer
+          class="elevation-24"
           :headers="headers"
           :items="resultados"
-          class="elevation-24"
-      >
+          :footer-props="{
+            'items-per-page-all-text': 'Todos',
+            'items-per-page-text': 'Itens por página:',
+          }">
+
+        <!-- TEMPLATE PARA A EXIBIÇÃO DA DURAÇÃO DA MÚSICA -->
+        <template #item.duration="{item}">
+          {{moment.utc(item.duration*1000).format('mm:ss')}}
+        </template>
 
         <!-- TEMPLATE PARA A EXIBIÇÃO DO LINK DA MÚSICA -->
         <template #item.link="{item}">
@@ -46,28 +53,6 @@
         </template>
       </v-data-table>
     </div>
-
-    <!-- CONTAINER DO CONTROLADOR DE PÁGINA -->
-    <div class="container text-center">
-
-      <!-- BOTÃO DE PÁGINA ANTERIOR -->
-      <v-btn @click="pag_anterior()" dark class="black ma-2 text-left" elevation="0" style="display: inline-block;" left small>
-        <v-icon dark left small>mdi-arrow-left</v-icon>
-        <span>Página Anterior</span>
-      </v-btn>
-
-      <!-- BOTÃO DE PÁGINA ATUAL -->
-      <v-btn fab dark small elevation="10" class="black">
-        <p style="font-weight: bold; display: inline-block; margin: 0px 30px;">{{pagina_atual}}</p>
-      </v-btn>
-
-      <!-- BOTÂO DE PRÓXIMA PÁGINA -->
-      <v-btn @click="proxima_pag()" dark class="black ma-2 text-right" elevation="0" style="display: inline-block;" right small>
-        <span>Próxima Página</span>
-        <v-icon dark right x-small>mdi-arrow-right</v-icon>
-      </v-btn>
-    </div>
-
   </v-app>
 </template>
 
@@ -102,45 +87,52 @@ export default {
         { text: 'Ouça no Deezer', value:  'link', sortable: false, align: 'center' },
       ],
       search: null,
+      index: 0,
       pesquisa_realizada: {
         argumento: null,
       },
       resultados: [],
-      pagina: 0,
-      pagina_atual: 1,
-      max_paginas: 0,
       moment: moment,
     }
   },
 
   methods:{
-
-    /* LISTA O RESULTADO DO ARGUMENTO PESQUISADO NO ARRAY resultados
-    E AMAZENA O ARGUMENTO PESQUISADO NA VAR search
+        
+    /* 
+    FAZ O GET DO TOTAL DE ITENS DO ARGUMENTO PESQUISADO E ENTÃO
+    REALIZA OUTRO GET LISTANDO TODOS OS RESULTADO DO ARGUMENTO PESQUISADO NO ARRAY resultados
     */
     get_pesquisa: function (){
-      this.salva_pesquisa(this.search)
-      Pesquisar.listar(this.search, this.pagina).then(resposta => {
-        this.resultados = resposta.data.data
-        this.max_paginas = resposta.data.total
-        this.formata_duracao();
+      Pesquisar.listar(this.search, this.index)
+      .then(resposta => {
+        let total = resposta.data.total
+        return total
+      })
+      .then(total => {
+        while (this.index < total){
+          Pesquisar.listar(this.search, this.index).then(resposta => {
+            for (let i = 0; i < resposta.data.data.length; i++){
+              this.resultados.push(resposta.data.data[i])
+            }
+          })
+          this.index += 25;
+        }
       })
     },
 
-    // IMPRIME O RESULTADO DA PESQUISA E REALIZA O POST DO ARGUMENTO PESQUISADO
-    nova_pesquisa: function (){
-      if (this.isBlank(this.search)){
-        return alert("Preencha o campo de pesquisa.")
-      } else {
-        this.pagina = 0;
-        this.pagina_atual = 1;
-        this.get_pesquisa();
-        this.post_pesquisa(this.pesquisa_realizada);
+    /*
+    DEFINE O index NOVAMENTE COMO 0 E
+    REMOVE OS RESULTADOS DO ARRAY resultados
+    */
+    limpa_resultados: function () {
+      this.index = 0;
+      while(this.resultados.length > 0) {
+        this.resultados.pop();
       }
     },
 
-    // SALVA OS DADOS PESQUISADOS NO OBJETO pesquisa_realizada
-    salva_pesquisa: function (argumento){
+    // ARMAZENA OS DADOS PESQUISADOS NO OBJETO pesquisa_realizada
+    armazena_pesquisa: function (argumento){
       this.pesquisa_realizada.argumento = argumento
     },
 
@@ -149,45 +141,25 @@ export default {
       Relatorio.salvar(this.pesquisa_realizada)
     },
 
-    // FORMATA A DURAÇÃO RECEBIDA DA MÚSICA
-    formata_duracao: function() {
-      for (let i = 0; i < this.resultados.length; i++){
-        this.resultados[i].duration = moment.utc(this.resultados[i].duration*1000).format('mm:ss')
-      }
-    },
-
     // VALIDA SE A STRING IS BLANK
     isBlank(str) {
     return (!str || /^\s*$/.test(str));
     },
 
-    // LISTA A PROXIMA PAGINA DO RESULTADO
-    proxima_pag: function (){
-      if ((this.pagina + 9 >= this.max_paginas) || (this.pagina + 10 == this.max_paginas)){
-        alert("Não há uma página posterior a essa.");
-        return
+    /*
+    IMPRIME O RESULTADO DA PESQUISA E
+    REALIZA O POST DO ARGUMENTO PESQUISADO
+    */
+    nova_pesquisa: function (){
+      if (this.isBlank(this.search)){
+        return alert("Preencha o campo de pesquisa.")
       } else {
-        this.search = this.pesquisa_realizada.argumento
-        this.pagina += 10
-        this.pagina_atual += 1
-        this.get_pesquisa();
+        this.limpa_resultados()
+        this.get_pesquisa()
+        this.armazena_pesquisa(this.search)
+        this.post_pesquisa();
       }
-    },
-
-    // LISTA A PAGINA ANTERIOR DO RESULTADO
-    pag_anterior: function (){
-      if ((this.pagina == 0) || ((this.pagina - 10) < 0)){  
-        this.pagina = 0
-        this.pagina_atual = 1
-        alert("Não há uma página anterior a essa.") 
-        return
-      } else {
-        this.search = this.pesquisa_realizada.argumento
-        this.pagina -= 10;
-        this.pagina_atual -= 1
-        this.get_pesquisa();
-      }
-    },
+    }
   }
 }
 </script>
