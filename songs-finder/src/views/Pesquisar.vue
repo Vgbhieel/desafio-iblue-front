@@ -104,20 +104,20 @@ export default {
     */
     get_pesquisa: function (){
       Pesquisar.listar(this.search, this.index)
-      .then(resposta => {
-        let total = resposta.data.total
-        return total
-      })
-      .then(total => {
-        while (this.index < total){
-          Pesquisar.listar(this.search, this.index).then(resposta => {
-            for (let i = 0; i < resposta.data.data.length; i++){
-              this.resultados.push(resposta.data.data[i])
-            }
-          })
-          this.index += 25;
-        }
-      })
+        .then(resposta => {
+          let total = resposta.data.total
+          return total
+        })
+        .then(total => {
+          while (this.index < total){
+            Pesquisar.listar(this.search, this.index).then(resposta => {
+              for (let i = 0; i < resposta.data.data.length; i++){
+                this.resultados.push(resposta.data.data[i])
+              }
+            })
+            this.index += 25;
+          }
+        })
     },
 
     /*
